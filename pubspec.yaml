@@ -16,6 +16,7 @@ dependencies:
   fast_csv: ^0.2.11
   csv: ^6.0.0
   collection: ^1.18.0
+  syncfusion_flutter_datagrid: 21.2.10
 
 dev_dependencies:
   flutter_test:
