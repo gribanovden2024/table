@@ -1,36 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
-class DynamicDataGrid extends StatelessWidget {
-  final List<Map<String, dynamic>> data;
-  final List<String> groupKeys;
-
-  const DynamicDataGrid(
-      {super.key, required this.data, required this.groupKeys});
-
-  @override
-  Widget build(BuildContext context) {
-    return SfDataGrid(
-      source: groupKeys == [] || groupKeys.isEmpty
-          ? DataSource(data)
-          : GroupedDataSource(groupKeys: groupKeys, data: data),
-      columns: data.first.keys.map((key) {
-        return GridColumn(
-          columnName: key,
-          label: Container(
-            padding: const EdgeInsets.all(8.0),
-            alignment: Alignment.center,
-            child: Text(
-              key,
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-          ),
-        );
-      }).toList(),
-    );
-  }
-}
-
 class GroupedDataSource extends DataGridSource {
   GroupedDataSource(
       {required List<Map<String, dynamic>> data,
