@@ -12,9 +12,9 @@ class GroupedDataGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SfDataGrid(
-      source: groupKeys == [] || groupKeys.isEmpty
-          ? DataSource(data)
-          : GroupedDataSource2(data: data, groupKeys: groupKeys),
+      source: /*groupKeys == [] || groupKeys.isEmpty
+          ? */DataSource(data)/*
+          : GroupedDataSource2(data: data, groupKeys: groupKeys)*/,
           // : GroupedDataSource2(data: data, groupKeys: groupKeys),
       columns: data.first.keys.map((key) {
         return GridColumn(

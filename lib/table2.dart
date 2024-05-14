@@ -12,7 +12,7 @@ class GroupedDataSource2 extends DataGridSource {
 
   List<DataGridRow> _groupAndSortData(
       List<Map<String, dynamic>> data, List<String> groupKeys) {
-    var groupedData = <String, List<Map<String, dynamic>>>{};
+    Map<String, List<Map<String, dynamic>>> groupedData = <String, List<Map<String, dynamic>>>{};
 
     var dataGridRows = <DataGridRow>[];
 

@@ -1,8 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import 'package:table/table.dart';
-import 'package:table/table2.dart';
-// import 'package:table/table2.dart';
 import 'data.dart';
 import 'grouped_data_grid.dart';
 
@@ -16,14 +12,20 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   List<String> _firstList = [];
   final List<String> _secondList = [];
+  List<Map<String, dynamic>> data = [];
   List<Map<String, dynamic>> groupedData = [];
   final d = Data();
 
   Future<void> _initializeData() async {
-    groupedData = await d.getCsv();
+    data = await d.getCsv();
     setState(() {
       _firstList = d.getKeys(d.csvTable);
     });
+  }
+
+  void tap() {
+    groupedData = d.sortTable(
+        table: data, selectKeys: _secondList, allKeys: _firstList, index: 0);
   }
 
   @override
@@ -72,7 +74,16 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       bottomNavigationBar: ElevatedButton(
-        onPressed: () => _showBottomSheet(context, groupedData, _secondList),
+        onPressed: () {
+          if (_secondList.isNotEmpty && _secondList != []) {
+            print('_secondList = $_secondList');
+            tap();
+          }
+          _showBottomSheet(
+              context,
+              _secondList.isEmpty || _secondList == [] ? data : groupedData,
+              _secondList);
+        },
         style: ButtonStyle(
           fixedSize: MaterialStateProperty.all(const Size(300, 50)),
           textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 14)),
@@ -99,9 +110,7 @@ void _showBottomSheet(BuildContext context, List<Map<String, dynamic>> data,
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
-          body: GroupedDataGrid(
-            data: data, groupKeys: secondList
-          ),
+          body: GroupedDataGrid(data: data, groupKeys: secondList),
         ),
       );
     },
