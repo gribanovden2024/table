@@ -33,36 +33,45 @@ class _MyHomePageState extends State<MyHomePage> {
         children: [
           Expanded(
             child: _firstList.isEmpty
-                    ? Container()
-                    : ListView.builder(
-                        itemCount: allKeys.length,
-                        itemBuilder: (context, index) {
-                          return ListTile(
-                            title: Text(allKeys[index]),
-                            selectedColor: Colors.red,
-                            selected: _secondList.contains(allKeys[index]),
-                            onTap: () => setState(() {
-                              if (!_secondList.contains(allKeys[index])) {
-                                _secondList.add(allKeys[index]);
-                              }
-                            }),
-                          );
-                        },
-                      ),
+                ? Container()
+                : ListView.builder(
+                    itemCount: allKeys.length,
+                    itemBuilder: (context, index) {
+                      return ListTile(
+                        title: Text(allKeys[index]),
+                        selectedColor: Colors.red,
+                        selected: _secondList.contains(allKeys[index]),
+                        onTap: () => setState(() {
+                          _secondList.contains(allKeys[index])
+                              ? _secondList.remove(allKeys[index])
+                              : _secondList.add(allKeys[index]);
+                        }),
+                      );
+                    },
+                  ),
           ),
           const VerticalDivider(),
           Expanded(
-            child: ListView.builder(
-              itemCount: _secondList.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(_secondList[index]),
-                  onTap: () => setState(() {
-                    _secondList.remove(_secondList[index]);
-                  }),
-                );
-              },
-            ),
+            child: ReorderableListView(
+                  children: _secondList
+                      .map((item) => ListTile(
+                    key: Key(item),
+                    title: Text(item),
+                    onTap: () => setState(() {
+                      _secondList.remove(item);
+                    }),
+                  ))
+                      .toList(),
+                  onReorder: (oldIndex, newIndex) {
+                    setState(() {
+                      if (newIndex > oldIndex) {
+                        newIndex -= 1;
+                      }
+                      final item = _secondList.removeAt(oldIndex);
+                      _secondList.insert(newIndex, item);
+                    });
+                  },
+                )
           ),
         ],
       ),

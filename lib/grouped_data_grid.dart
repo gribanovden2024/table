@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
-import 'package:table/table.dart';
+import 'package:table/data_source.dart';
 
 class GroupedDataGrid extends StatefulWidget {
   const GroupedDataGrid(this.data, {super.key});

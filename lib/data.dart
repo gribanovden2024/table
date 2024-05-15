@@ -19,6 +19,7 @@ class Data {
 
   Future<List<Map<String, dynamic>>> loadCsvFile() async {
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+    uploadInput.accept = '.csv';
     uploadInput.click();
 
     await uploadInput.onChange.first;

@@ -22,7 +22,6 @@ class DataSource extends DataGridSource {
 
   @override
   DataGridRowAdapter buildRow(DataGridRow row) {
-    // Подсчитываем количество непустых значений в строке и находим индекс непустой ячейки
     int nonEmptyCellCount = 0;
     int nonEmptyCellIndex = -1;
 
@@ -46,12 +45,14 @@ class DataSource extends DataGridSource {
                   : Colors.white,
           padding: const EdgeInsets.all(8.0),
           alignment: Alignment.center,
-          child: Text(
-            cell.value.toString(),
-            style: isSingleNonEmpty
-                ? const TextStyle(fontWeight: FontWeight.bold)
-                : const TextStyle(),
-          ),
+          child: Text(cell.value.toString(),
+              style: TextStyle(
+                  fontWeight:
+                      isSingleNonEmpty ? FontWeight.bold : FontWeight.normal,
+                  color: double.tryParse(cell.value) != null &&
+                          double.tryParse(cell.value)! < 0
+                      ? Colors.red
+                      : Colors.black)),
         );
       }).toList(),
     );
