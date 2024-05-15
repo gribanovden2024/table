@@ -1,38 +1,53 @@
-import 'dart:async' show Future;
+import 'dart:async' show Completer, Future;
 import 'package:collection/collection.dart';
 import 'package:fast_csv/csv_converter.dart';
 import 'package:flutter/services.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
+import 'dart:html' as html;
 
 class Data {
   late List<List<dynamic>>? csvTable;
   late List<Map<String, dynamic>> convertTabled;
   late List<DataGridRow> dataGridRowTabled;
 
-  Future<List<Map<String, dynamic>>> getCsv() async {
+  Future<List<Map<String, dynamic>>> getCsv(String? filePath) async {
     final csvString = await rootBundle.loadString('assets/data.csv');
     csvTable = CsvConverter().convert(csvString);
     convertTabled = convertTable(csvTable!);
-    // convertTabled = convertTable(csvTable!);
     return convertTabled;
   }
 
-  List<DataGridRow> convertDataGridRow(List<Map<String, dynamic>> data) {
-    List<DataGridRow> result = [];
-    for (var element in data) {
-      List<DataGridCell> cells = [];
-      element.forEach((key, value) {
-        cells.add(DataGridCell(columnName: key, value: value));
-      });
-      result.add(DataGridRow(cells: cells));
-    }
-    dataGridRowTabled = result;
-    return result;
+  Future<List<Map<String, dynamic>>> loadCsvFile() async {
+    html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+    uploadInput.click();
+
+    await uploadInput.onChange.first;
+
+    html.File file = uploadInput.files!.first;
+
+    final reader = html.FileReader();
+    final completer = Completer<String>();
+
+    reader.onLoadEnd.listen((event) {
+      completer.complete(reader.result as String);
+    });
+
+    reader.readAsText(file);
+
+    String csvString = await completer.future;
+
+    final csvTable = CsvConverter().convert(csvString);
+    final convertedTable = convertTable(csvTable);
+
+    return convertedTable;
   }
 
-  List<String> getKeys(List<List<dynamic>>? data) {
-    List<String> result = data![0].map((value) => value.toString()).toList();
-    return result /*.sublist(1)*/;
+  List<String> getKeys(List<Map<String, dynamic>>? data) {
+    if (data == null || data.isEmpty) {
+      throw ArgumentError("Data cannot be null or empty");
+    }
+
+    return data[0].keys.map((e) => e.toString()).toList();
   }
 
   List<Map<String, dynamic>> convertTable(List<List<dynamic>> table) {
@@ -95,7 +110,6 @@ class Data {
       }
     });
 
-    // table.addAll(sortedTable);
     return sortedTable.toSet().toList();
   }
 }

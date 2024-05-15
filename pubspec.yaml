@@ -17,6 +17,7 @@ dependencies:
   csv: ^6.0.0
   collection: ^1.18.0
   syncfusion_flutter_datagrid: 21.2.10
+  file_picker: ^8.0.0+1
 
 dev_dependencies:
   flutter_test:

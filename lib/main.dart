@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'data.dart';
 import 'grouped_data_grid.dart';
 
+void main() => runApp(const MaterialApp(home: MyHomePage()));
+
 class MyHomePage extends StatefulWidget {
   const MyHomePage({super.key});
 
@@ -16,46 +18,37 @@ class _MyHomePageState extends State<MyHomePage> {
   List<Map<String, dynamic>> groupedData = [];
   final d = Data();
 
-  Future<void> _initializeData() async {
-    data = await d.getCsv();
-    setState(() {
-      _firstList = d.getKeys(d.csvTable);
-    });
-  }
-
-  void tap() {
-    groupedData = d.sortTable(
-        table: data, selectKeys: _secondList, allKeys: _firstList, index: 0);
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _initializeData();
-    d.getCsv().then((_) {
-      setState(() {
-        _firstList = d.getKeys(d.csvTable);
-      });
-    });
-  }
+  void tap() => groupedData = d.sortTable(
+      table: data, selectKeys: _secondList, allKeys: _firstList, index: 0);
 
   @override
   Widget build(BuildContext context) {
+    List<String> allKeys = _firstList.isNotEmpty
+        ? _firstList[0] == ''
+            ? _firstList.sublist(1)
+            : _firstList
+        : [];
     return Scaffold(
       body: Row(
         children: [
           Expanded(
-            child: ListView.builder(
-              itemCount: _firstList.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(_firstList[index]),
-                  onTap: () => setState(() {
-                    _secondList.add(_firstList[index]);
-                  }),
-                );
-              },
-            ),
+            child: _firstList.isEmpty
+                    ? Container()
+                    : ListView.builder(
+                        itemCount: allKeys.length,
+                        itemBuilder: (context, index) {
+                          return ListTile(
+                            title: Text(allKeys[index]),
+                            selectedColor: Colors.red,
+                            selected: _secondList.contains(allKeys[index]),
+                            onTap: () => setState(() {
+                              if (!_secondList.contains(allKeys[index])) {
+                                _secondList.add(allKeys[index]);
+                              }
+                            }),
+                          );
+                        },
+                      ),
           ),
           const VerticalDivider(),
           Expanded(
@@ -73,28 +66,47 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      bottomNavigationBar: ElevatedButton(
-        onPressed: () {
-          if (_secondList.isNotEmpty && _secondList != []) {
-            print('_secondList = $_secondList');
-            tap();
-          }
-          _showBottomSheet(
-              context,
-              _secondList.isEmpty || _secondList == [] ? data : groupedData,
-              _secondList);
-        },
-        style: ButtonStyle(
-          fixedSize: MaterialStateProperty.all(const Size(300, 50)),
-          textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 14)),
-        ),
-        child: const Text('Построить'),
+      bottomNavigationBar: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          ElevatedButton(
+            onPressed: () async {
+              data = await d.loadCsvFile();
+              setState(() {
+                _firstList = d.getKeys(data);
+                _secondList.clear();
+              });
+            },
+            style: ButtonStyle(
+              fixedSize: MaterialStateProperty.all(const Size(300, 50)),
+              textStyle:
+                  MaterialStateProperty.all(const TextStyle(fontSize: 14)),
+            ),
+            child: const Text('Выбрать файл'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (_secondList.isNotEmpty && _secondList != []) {
+                print('_secondList = $_secondList');
+                tap();
+              }
+              _showBottomSheet(
+                  context,
+                  _secondList.isEmpty || _secondList == [] ? data : groupedData,
+                  _secondList);
+            },
+            style: ButtonStyle(
+              fixedSize: MaterialStateProperty.all(const Size(300, 50)),
+              textStyle:
+                  MaterialStateProperty.all(const TextStyle(fontSize: 14)),
+            ),
+            child: const Text('Построить'),
+          ),
+        ],
       ),
     );
   }
 }
-
-void main() => runApp(const MaterialApp(home: MyHomePage()));
 
 void _showBottomSheet(BuildContext context, List<Map<String, dynamic>> data,
     List<String> secondList) {
@@ -110,7 +122,7 @@ void _showBottomSheet(BuildContext context, List<Map<String, dynamic>> data,
               onPressed: () => Navigator.of(context).pop(),
             ),
           ),
-          body: GroupedDataGrid(data: data, groupKeys: secondList),
+          body: GroupedDataGrid(data),
         ),
       );
     },
