@@ -1,7 +1,7 @@
 import 'dart:async' show Completer, Future;
 import 'package:collection/collection.dart';
 import 'package:fast_csv/csv_converter.dart';
-import 'package:flutter/services.dart';
+import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'dart:html' as html;
 
@@ -10,12 +10,12 @@ class Data {
   late List<Map<String, dynamic>> convertTabled;
   late List<DataGridRow> dataGridRowTabled;
 
-  Future<List<Map<String, dynamic>>> getCsv(String? filePath) async {
-    final csvString = await rootBundle.loadString('assets/data.csv');
-    csvTable = CsvConverter().convert(csvString);
-    convertTabled = convertTable(csvTable!);
-    return convertTabled;
-  }
+  // Future<List<Map<String, dynamic>>> getCsv(String? filePath) async {
+  //   final csvString = await rootBundle.loadString('assets/data.csv');
+  //   csvTable = CsvConverter().convert(csvString);
+  //   convertTabled = convertTable(csvTable!);
+  //   return convertTabled;
+  // }
 
   Future<List<Map<String, dynamic>>> loadCsvFile() async {
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
@@ -77,40 +77,112 @@ class Data {
   List<Map<String, dynamic>> sortTable(
       {required List<Map<String, dynamic>> table,
       required List<String> selectKeys,
-      required List<String> allKeys,
       required int index}) {
-    Map<dynamic, List<Map<String, dynamic>>> groupedTable =
+    Map<String, List<Map<String, dynamic>>> groupedTable =
         groupBy(table, (obj) => obj[selectKeys[index]]);
-
     List<Map<String, dynamic>> sortedTable = [];
+
     for (var element in table) {
       String groupKey = element[selectKeys[index]].toString();
+
       if (!groupedTable.containsKey(groupKey)) {
         groupedTable[groupKey] = [];
       }
       groupedTable[groupKey]!.add(element);
     }
-    groupedTable.forEach((groupKey, value) {
+
+    groupedTable.forEach((keyGroup, valueGroup) {
       // Добавляем элемент с заголовком группы
       Map<String, dynamic> firstEntry = {};
-      for (var key in value.first.keys) {
-        firstEntry[key] =
-            key == value.first.keys.elementAt(index) ? groupKey : '';
+
+      // Инициализируем сумму для ключа 'xxdiv'
+      double sum = 0;
+
+      for (var key in valueGroup.first.keys) {
+        // Если текущий ключ 'xxdiv', вычисляем сумму значений
+        if (key == 'xxdiv') {
+          sum = valueGroup.fold(
+              0,
+              (previous, element) =>
+                  previous + (double.tryParse(element[key]) ?? 0));
+          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
+        } else if (key == 'xendSpent') {
+          sum = valueGroup.fold(
+              0,
+              (previous, element) =>
+                  previous + (double.tryParse(element[key]) ?? 0));
+          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
+        } else if (key == 'timespent') {
+          sum = valueGroup.fold(
+              0,
+              (previous, element) =>
+                  previous + (double.tryParse(element[key]) ?? 0));
+          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
+        } else if (key == 'estimateH') {
+          sum = valueGroup.fold(
+              0,
+              (previous, element) =>
+                  previous + (double.tryParse(element[key]) ?? 0));
+          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
+        } else if (key == 'start_time_estimate') {
+          sum = valueGroup.fold(
+              0,
+              (previous, element) =>
+                  previous + (double.tryParse(element[key]) ?? 0));
+          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
+        } else if (key == 'end_time_estimate') {
+          sum = valueGroup.fold(
+              0,
+              (previous, element) =>
+                  previous + (double.tryParse(element[key]) ?? 0));
+          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
+        } else {
+          firstEntry[key] =
+              key == valueGroup.first.keys.elementAt(index) ? keyGroup : '';
+        }
       }
       sortedTable.add(firstEntry);
 
       // Добавляем все строки из элемента value с этим ключом
       if (selectKeys.length - 1 > index) {
         sortedTable.addAll(sortTable(
-            table: value,
-            selectKeys: selectKeys,
-            allKeys: allKeys,
-            index: index + 1));
+            table: valueGroup, selectKeys: selectKeys, index: index + 1));
       } else {
-        sortedTable.addAll(value);
+        sortedTable.addAll(valueGroup);
       }
     });
 
     return sortedTable.toSet().toList();
+  }
+
+  Color textColor(dynamic data) {
+    return (data is String &&
+                double.tryParse(data) != null &&
+                double.tryParse(data)! < 0) ||
+            (data is num && data < 0)
+        ? Colors.red
+        : Colors.black;
+  }
+
+  String roundDoubleToString(dynamic value) {
+    double? val;
+    if (value is String && double.tryParse(value)==null) {
+      return value;
+    } else {
+      if (value is! num) {
+        val = double.tryParse(value);
+      } else {
+        val = value as double?;
+      }
+        // Округляем число до трех знаков после запятой
+        double rounded = double.parse(val!.toStringAsFixed(3));
+        // Если результат равен исходному числу, возвращаем его в виде строки
+        if (rounded == val) {
+          return val.toString();
+        }
+        // Иначе, возвращаем округленное число в виде строки
+        return rounded.toString();
+
+    }
   }
 }
