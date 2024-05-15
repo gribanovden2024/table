@@ -19,7 +19,7 @@ class _MyHomePageState extends State<MyHomePage> {
   final d = Data();
 
   void tap() => groupedData = d.sortTable(
-      table: data, selectKeys: _secondList, allKeys: _firstList, index: 0);
+      table: data, selectKeys: _secondList, index: 0);
 
   @override
   Widget build(BuildContext context) {
