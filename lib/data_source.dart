@@ -5,7 +5,8 @@ import 'data.dart';
 
 class DataSource extends DataGridSource {
   final d = Data();
-  DataSource(List<Map<String, dynamic>> data) {
+int i;
+  DataSource(List<Map<String, dynamic>> data, this.i) {
     _dataGridRows = data.map<DataGridRow>((map) {
       return DataGridRow(
         cells: map.entries.map((entry) {
@@ -25,32 +26,33 @@ class DataSource extends DataGridSource {
 
   @override
   DataGridRowAdapter buildRow(DataGridRow row) {
-    int emptyCellCount = 0; // Количество пустых ячеек
-    int emptyCellIndex = -1; // Индекс первой непустой ячейки
+    int emptyCellCount = 0;
+    int emptyCellIndex = -1;
 
     for (int i = 0; i < row.getCells().length; i++) {
       if (row.getCells()[i].value.toString().isEmpty) {
-        emptyCellCount++; // Увеличиваем количество пустых ячеек
+        emptyCellCount++;
       } else if (emptyCellIndex == -1) {
-        emptyCellIndex = i; // Записываем индекс первой непустой ячейки
+        emptyCellIndex = i;
       }
     }
 
     return DataGridRowAdapter(
       cells: row.getCells().map((cell) {
         bool isSingleNonEmpty =
-            emptyCellCount > 0 && cell.value.toString().isNotEmpty;
+            emptyCellCount > i && cell.value.toString().isNotEmpty;
 
         return Container(
-          color: emptyCellIndex == 0 && emptyCellCount > 0
+          color: emptyCellIndex == 0 && emptyCellCount > i
               ? Colors.yellow
-              : emptyCellIndex == 1
-                  ? Colors.grey
-                  : Colors.white,
+              : emptyCellIndex == 1 && emptyCellCount > i
+                  ? Colors.grey[700]
+                  : emptyCellIndex == 2 && emptyCellCount > i
+                      ? Colors.grey[500]
+                      : Colors.white,
           padding: const EdgeInsets.all(8.0),
           alignment: Alignment.center,
-          child: Text(
-              d.roundDoubleToString(cell.value),
+          child: Text(d.roundDoubleToString(cell.value),
               // cell.value.toString(),
               style: TextStyle(
                   fontWeight:

@@ -1,4 +1,5 @@
 import 'dart:async' show Completer, Future;
+import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:fast_csv/csv_converter.dart';
 import 'package:flutter/material.dart';
@@ -77,7 +78,15 @@ class Data {
   List<Map<String, dynamic>> sortTable(
       {required List<Map<String, dynamic>> table,
       required List<String> selectKeys,
+      required List<String> allKeys,
+      required List<String> summKeys,
       required int index}) {
+    List<String> actualKeys = [];
+    for (int i = 0; i<selectKeys.length; i++) {
+      actualKeys.add('xlevel${i+1}');
+    }
+    actualKeys.addAll(allKeys);
+
     Map<String, List<Map<String, dynamic>>> groupedTable =
         groupBy(table, (obj) => obj[selectKeys[index]]);
     List<Map<String, dynamic>> sortedTable = [];
@@ -92,67 +101,94 @@ class Data {
     }
 
     groupedTable.forEach((keyGroup, valueGroup) {
-      // Добавляем элемент с заголовком группы
       Map<String, dynamic> firstEntry = {};
 
-      // Инициализируем сумму для ключа 'xxdiv'
       double sum = 0;
 
-      for (var key in valueGroup.first.keys) {
-        // Если текущий ключ 'xxdiv', вычисляем сумму значений
-        if (key == 'xxdiv') {
-          sum = valueGroup.fold(
-              0,
-              (previous, element) =>
-                  previous + (double.tryParse(element[key]) ?? 0));
-          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
-        } else if (key == 'xendSpent') {
-          sum = valueGroup.fold(
-              0,
-              (previous, element) =>
-                  previous + (double.tryParse(element[key]) ?? 0));
-          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
-        } else if (key == 'timespent') {
-          sum = valueGroup.fold(
-              0,
-              (previous, element) =>
-                  previous + (double.tryParse(element[key]) ?? 0));
-          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
-        } else if (key == 'estimateH') {
-          sum = valueGroup.fold(
-              0,
-              (previous, element) =>
-                  previous + (double.tryParse(element[key]) ?? 0));
-          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
-        } else if (key == 'start_time_estimate') {
-          sum = valueGroup.fold(
-              0,
-              (previous, element) =>
-                  previous + (double.tryParse(element[key]) ?? 0));
-          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
-        } else if (key == 'end_time_estimate') {
+      for (var key in actualKeys/*allKeys*/) {
+        if (summKeys.contains(key)) {
           sum = valueGroup.fold(
               0,
               (previous, element) =>
                   previous + (double.tryParse(element[key]) ?? 0));
           firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
         } else {
-          firstEntry[key] =
-              key == valueGroup.first.keys.elementAt(index) ? keyGroup : '';
+          firstEntry[key] = key == actualKeys/*allKeys*/.elementAt(index) ? keyGroup : '';
         }
       }
       sortedTable.add(firstEntry);
 
-      // Добавляем все строки из элемента value с этим ключом
       if (selectKeys.length - 1 > index) {
         sortedTable.addAll(sortTable(
-            table: valueGroup, selectKeys: selectKeys, index: index + 1));
+            table: valueGroup,
+            selectKeys: selectKeys,
+            allKeys: allKeys,
+            summKeys: summKeys,
+            index: index + 1));
       } else {
-        sortedTable.addAll(valueGroup);
+        for (var element in valueGroup) {
+          Map<String, dynamic> sortedRow = {};
+          for (var key in actualKeys/*allKeys*/) {
+            sortedRow[key] = element[key] ?? '';
+          }
+          if (!sortedTable.contains(sortedRow)) {
+            sortedTable.add(sortedRow);
+          }
+        }
       }
     });
-
+    sortedTable = removeDuplicates(sortedTable, selectKeys.length);
     return sortedTable.toSet().toList();
+  }
+
+  // List<Map<String, dynamic>> removeDuplicates(
+  //     List<Map<String, dynamic>> sortedTable) {
+  //   final uniqueEntries = <String>{};
+  //   final uniqueSortedTable = <Map<String, dynamic>>[];
+  //
+  //   for (var entry in sortedTable) {
+  //     // Check if the entry contains any empty values
+  //     bool hasEmptyValue = entry.values.any((value) => value.toString().isEmpty);
+  //
+  //     // Encode entry to JSON string
+  //     final entryJson = jsonEncode(entry);
+  //
+  //     // If entry has no empty values and is unique, add to uniqueSortedTable
+  //     if (!hasEmptyValue && uniqueEntries.add(entryJson)) {
+  //       uniqueSortedTable.add(entry);
+  //     } else if (hasEmptyValue) {
+  //       // If entry has empty values, add to uniqueSortedTable without checking for duplicates
+  //       uniqueSortedTable.add(entry);
+  //     }
+  //   }
+  //
+  //   return uniqueSortedTable;
+  // }
+
+  List<Map<String, dynamic>> removeDuplicates(
+      List<Map<String, dynamic>> sortedTable, int i) {
+    final uniqueEntries = <String>{};
+    final uniqueSortedTable = <Map<String, dynamic>>[];
+
+    for (var entry in sortedTable) {
+      // Check the number of empty values in the entry
+      int emptyValueCount = entry.values.where((value) => value.toString().isEmpty).length;
+
+      // Encode entry to JSON string
+      final entryJson = jsonEncode(entry);
+
+      // If entry has more empty values than 'i', check for uniqueness
+      if (emptyValueCount == i) {
+        if (uniqueEntries.add(entryJson)) {
+          uniqueSortedTable.add(entry);
+        }
+      } else {
+        // If empty values are less than or equal to 'i', add to uniqueSortedTable without checking for duplicates
+        uniqueSortedTable.add(entry);
+      }
+    }
+
+    return uniqueSortedTable;
   }
 
   Color textColor(dynamic data) {
@@ -166,7 +202,7 @@ class Data {
 
   String roundDoubleToString(dynamic value) {
     double? val;
-    if (value is String && double.tryParse(value)==null) {
+    if (value is String && double.tryParse(value) == null) {
       return value;
     } else {
       if (value is! num) {
@@ -174,15 +210,28 @@ class Data {
       } else {
         val = value as double?;
       }
-        // Округляем число до трех знаков после запятой
-        double rounded = double.parse(val!.toStringAsFixed(3));
-        // Если результат равен исходному числу, возвращаем его в виде строки
-        if (rounded == val) {
-          return val.toString();
-        }
-        // Иначе, возвращаем округленное число в виде строки
-        return rounded.toString();
-
+      // Округляем число до трех знаков после запятой
+      double rounded = double.parse(val!.toStringAsFixed(3));
+      // Если результат равен исходному числу, возвращаем его в виде строки
+      if (rounded == val) {
+        return val.toString();
+      }
+      // Иначе, возвращаем округленное число в виде строки
+      return rounded.toString();
     }
+  }
+
+  List<String> sortListByAnotherList(List<String> list1, List<String> list2) {
+    final Map<String, int> indexMap = {
+      for (int i = 0; i < list2.length; i++) list2[i]: i
+    };
+
+    list1.sort((a, b) {
+      final indexA = indexMap[a] ?? list2.length;
+      final indexB = indexMap[b] ?? list2.length;
+      return indexA.compareTo(indexB);
+    });
+
+    return list1;
   }
 }
