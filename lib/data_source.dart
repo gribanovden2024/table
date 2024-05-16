@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 
+import 'app_theme.dart';
 import 'data.dart';
 
 class DataSource extends DataGridSource {
   final d = Data();
-int i;
+  int i;
+
   DataSource(List<Map<String, dynamic>> data, this.i) {
     _dataGridRows = data.map<DataGridRow>((map) {
       return DataGridRow(
@@ -43,21 +45,34 @@ int i;
             emptyCellCount > i && cell.value.toString().isNotEmpty;
 
         return Container(
-          color: emptyCellIndex == 0 && emptyCellCount > i
-              ? Colors.yellow
-              : emptyCellIndex == 1 && emptyCellCount > i
-                  ? Colors.grey[700]
-                  : emptyCellIndex == 2 && emptyCellCount > i
-                      ? Colors.grey[500]
-                      : Colors.white,
-          padding: const EdgeInsets.all(8.0),
-          alignment: Alignment.center,
-          child: Text(d.roundDoubleToString(cell.value),
-              // cell.value.toString(),
-              style: TextStyle(
-                  fontWeight:
-                      isSingleNonEmpty ? FontWeight.bold : FontWeight.normal,
-                  color: Data().textColor(cell.value))),
+          color: emptyCellIndex == 0 && emptyCellCount >= 1
+              ? AppTheme.xlevel1
+              : emptyCellIndex == 1 && emptyCellCount >= 1
+                  ? AppTheme.xlevel2
+                  : Colors.white,
+          padding: const EdgeInsets.all(2.0),
+          alignment: Alignment.centerLeft,
+          child: Text(
+            d.roundDoubleToString(cell.value),
+            style: TextStyle(
+                fontSize: 12,
+                fontWeight: emptyCellCount > 0 &&
+                        (emptyCellIndex == 0 ||
+                            emptyCellIndex == 1 ||
+                            emptyCellIndex == 2)
+                    ? FontWeight.bold
+                    : FontWeight.normal,
+                fontStyle: emptyCellCount > 0 && emptyCellIndex == 3
+                    ? FontStyle.italic
+                    : FontStyle.normal,
+                color: Data().textColor(cell.value),
+            ),
+
+            // TextStyle(
+            //     fontWeight:
+            //         isSingleNonEmpty ? FontWeight.bold : FontWeight.normal,
+            //     color: Data().textColor(cell.value)),
+          ),
         );
       }).toList(),
     );

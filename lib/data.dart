@@ -138,6 +138,7 @@ class Data {
       }
     });
     sortedTable = removeDuplicates(sortedTable, selectKeys.length);
+    sortedTable = removeEmptyEntries(sortedTable);
     return sortedTable.toSet().toList();
   }
 
@@ -164,6 +165,19 @@ class Data {
   //
   //   return uniqueSortedTable;
   // }
+
+  List<Map<String, dynamic>> removeEmptyEntries(List<Map<String, dynamic>> sortedTable) {
+    final List<String> selectKeys = ['xlevel1', 'xlevel2', 'xlevel3', 'xlevel4', 'xlevel5', 'xlevel6', 'xlevel7', 'xlevel8', 'xlevel9'];
+    return sortedTable.where((entry) {
+      for (var key in selectKeys) {
+        if (entry[key] != null && entry[key].toString().isNotEmpty) {
+          return true; // Найдено непустое значение, сохраняем элемент
+        }
+      }
+      return false; // Все значения пустые, удаляем элемент
+    }).toList();
+  }
+
 
   List<Map<String, dynamic>> removeDuplicates(
       List<Map<String, dynamic>> sortedTable, int i) {
@@ -211,7 +225,7 @@ class Data {
         val = value as double?;
       }
       // Округляем число до трех знаков после запятой
-      double rounded = double.parse(val!.toStringAsFixed(3));
+      double rounded = double.parse(val!.toStringAsFixed(1));
       // Если результат равен исходному числу, возвращаем его в виде строки
       if (rounded == val) {
         return val.toString();

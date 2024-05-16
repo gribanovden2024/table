@@ -17,28 +17,30 @@ class _GroupedDataGridState extends State<GroupedDataGrid> {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       // Устанавливаем фиксированную ширину для каждой колонки (например, 100)
-      double columnWidth = 100.0;
+      // double columnWidth = 100.0;
       // Общая ширина таблицы
-      double tableWidth = columnWidth * widget.data.first.keys.length;
+      // double tableWidth = columnWidth * widget.data.first.keys.length;
 
       // Рассчитываем ширину для контейнера
-      double width =
-          tableWidth > constraints.maxWidth ? constraints.maxWidth : tableWidth;
+      // double width =
+      //     tableWidth > constraints.maxWidth ? constraints.maxWidth : tableWidth;
 
       return SizedBox(
-        width: width,
+        // width: width,
         child: SfDataGrid(
+          headerRowHeight: 20,
           columnWidthMode: ColumnWidthMode.auto,
           source: DataSource(widget.data, widget.i),
+          rowHeight: 20,
           columns: widget.data.first.keys.map((key) {
             return GridColumn(
               columnName: key,
               label: Container(
-                padding: const EdgeInsets.all(8.0),
-                alignment: Alignment.center,
+                padding: const EdgeInsets.all(2.0),
+                alignment: Alignment.centerLeft,
                 child: Text(
                   key,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                 ),
               ),
               // width: columnWidth,
