@@ -85,7 +85,7 @@ class Data {
     for (int i = 0; i<selectKeys.length; i++) {
       actualKeys.add('xlevel${i+1}');
     }
-    actualKeys.addAll(allKeys);
+    actualKeys.addAll(summKeys);
 
     Map<String, List<Map<String, dynamic>>> groupedTable =
         groupBy(table, (obj) => obj[selectKeys[index]]);

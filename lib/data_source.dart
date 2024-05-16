@@ -41,8 +41,8 @@ class DataSource extends DataGridSource {
 
     return DataGridRowAdapter(
       cells: row.getCells().map((cell) {
-        bool isSingleNonEmpty =
-            emptyCellCount > i && cell.value.toString().isNotEmpty;
+        // bool isSingleNonEmpty =
+        //     emptyCellCount > i && cell.value.toString().isNotEmpty;
 
         return Container(
           color: emptyCellIndex == 0 && emptyCellCount >= 1
@@ -54,6 +54,7 @@ class DataSource extends DataGridSource {
           alignment: Alignment.centerLeft,
           child: Text(
             d.roundDoubleToString(cell.value),
+            maxLines: 2,
             style: TextStyle(
                 fontSize: 12,
                 fontWeight: emptyCellCount > 0 &&

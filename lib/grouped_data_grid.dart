@@ -25,28 +25,26 @@ class _GroupedDataGridState extends State<GroupedDataGrid> {
       // double width =
       //     tableWidth > constraints.maxWidth ? constraints.maxWidth : tableWidth;
 
-      return SizedBox(
-        // width: width,
-        child: SfDataGrid(
-          headerRowHeight: 20,
-          columnWidthMode: ColumnWidthMode.auto,
-          source: DataSource(widget.data, widget.i),
-          rowHeight: 20,
-          columns: widget.data.first.keys.map((key) {
-            return GridColumn(
-              columnName: key,
-              label: Container(
-                padding: const EdgeInsets.all(2.0),
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  key,
-                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                ),
+      return SfDataGrid(
+        headerRowHeight: 20,
+        columnWidthMode: ColumnWidthMode.lastColumnFill,
+        source: DataSource(widget.data, widget.i),
+        rowHeight: 20,
+        columns: widget.data.first.keys.map((key) {
+          return GridColumn(
+            columnName: key,
+            label: Container(
+              padding: const EdgeInsets.all(2.0),
+              alignment: Alignment.centerLeft,
+              child: Text(
+                key,
+                style:
+                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
-              // width: columnWidth,
-            );
-          }).toList(),
-        ),
+            ),
+            // width: columnWidth,
+          );
+        }).toList(),
       );
     });
   }

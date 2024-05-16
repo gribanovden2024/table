@@ -53,17 +53,17 @@ class _MyHomePageState extends State<MyHomePage> {
                                 leading: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
-                                    GestureDetector(
-                                            child: Icon(
-                                                actualKeys.contains(item)
-                                                    ? Icons.delete_outline
-                                                    : Icons.delete),
-                                            onTap: () => setState(() {
-                                              actualKeys.contains(item)
-                                                  ? actualKeys.remove(item)
-                                                  : actualKeys.add(item);
-                                            }),
-                                          ),
+                                    // GestureDetector(
+                                    //         child: Icon(
+                                    //             actualKeys.contains(item)
+                                    //                 ? Icons.delete_outline
+                                    //                 : Icons.add),
+                                    //         onTap: () => setState(() {
+                                    //           actualKeys.contains(item)
+                                    //               ? actualKeys.remove(item)
+                                    //               : actualKeys.add(item);
+                                    //         }),
+                                    //       ),
                                     actualKeys.contains(item)
                                         ? GestureDetector(
                                             child: Icon(summKeys.contains(item)
