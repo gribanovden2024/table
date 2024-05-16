@@ -27,7 +27,9 @@ class _GroupedDataGridState extends State<GroupedDataGrid> {
 
       return SfDataGrid(
         headerRowHeight: 20,
-        columnWidthMode: ColumnWidthMode.lastColumnFill,
+        // shrinkWrapRows: true,
+        // shrinkWrapColumns: true,
+        columnWidthMode: ColumnWidthMode.auto,
         source: DataSource(widget.data, widget.i),
         rowHeight: 20,
         columns: widget.data.first.keys.map((key) {
