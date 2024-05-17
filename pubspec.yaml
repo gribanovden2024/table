@@ -14,10 +14,7 @@ dependencies:
 
   cupertino_icons: ^1.0.8
   fast_csv: ^0.2.11
-#  csv: ^6.0.0
   collection: ^1.18.0
-  syncfusion_flutter_datagrid: ^22.2.5
-#  file_picker: ^8.0.3
 
 dev_dependencies:
   flutter_test:

@@ -1,7 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 
 import 'app_theme.dart';
-import 'container_box.dart';
 import 'data.dart';
 
 class DynamicDataTable extends StatefulWidget {
@@ -15,85 +14,138 @@ class DynamicDataTable extends StatefulWidget {
 
 class _DynamicDataTableState extends State<DynamicDataTable> {
   late List<Map<String, dynamic>> _data;
+  late int _hoveredRowIndex;
 
   @override
   void initState() {
     super.initState();
     _data = widget.data;
-  }
-
-  void updateData(int rowIndex, Map<String, dynamic> newData) {
-    setState(() {
-      _data[rowIndex] = newData;
-    });
+    _hoveredRowIndex = -1;
   }
 
   @override
   Widget build(BuildContext context) {
     final d = Data();
-    if (widget.data.isEmpty) {
+    if (_data.isEmpty) {
       return const Center(child: Text('No data available'));
     }
     return Padding(
       padding: const EdgeInsets.all(8.0),
       child: ListView.builder(
-        itemCount: widget.data.length + 1,
+        itemCount: _data.length + 1,
         itemBuilder: (context, index) {
-          return IntrinsicHeight(
-            child: Row(
-              children: widget.data.first.keys.map((column) {
-                final List<String> selectKeys = [
-                  'xlevel1',
-                  'xlevel2',
-                  'xlevel3',
-                  'xlevel4',
-                  'xlevel5',
-                  'xlevel6',
-                  'xlevel7',
-                  'xlevel8',
-                  'xlevel9'
-                ];
-                // int emptyCellCount = 0;
-                int emptyCellIndex = -1;
+          return MouseRegion(
+            onEnter: (_) {
+              setState(() {
+                _hoveredRowIndex = index;
+              });
+            },
+            onExit: (_) {
+              setState(() {
+                _hoveredRowIndex = -1;
+              });
+            },
+            child: IntrinsicHeight(
+              child: Row(
+                children: _data.first.keys.map((column) {
+                  int emptyCellIndex = -1;
 
-                for (int i = 0; i < selectKeys.length; i++) {
-                  if (index >0&& widget.data[index-1][selectKeys[i]].toString().isNotEmpty) {
-                    emptyCellIndex = i;
-                    break;
+                  for (int i = 0; i < _data.first.keys.length; i++) {
+                    if (index > 0 &&
+                        _data[index - 1]['xlevel${i + 1}']
+                            .toString()
+                            .isNotEmpty) {
+                      emptyCellIndex = i;
+                      break;
+                    }
                   }
-                }
-                return Expanded(
-                  child: Container(
-                    decoration: BoxDecoration(
-                        color: d.colorRow(index == 0 ?1 :emptyCellIndex),
-                        border: Border.all(color: AppTheme.xlevel2)),
-                    padding: const EdgeInsets.all(1.0),
-                    child: Align(
-                      alignment: Alignment.center,
-                      child: Text(index == 0
-                          ? column.toString()
-                          : d.roundDoubleToString(_data[index - 1][column]?.toString()) ?? '',
-                        style: index == 0 ?TextStyle() :d.textRow(emptyCellIndex, _data[index - 1][column]?.toString()),
+
+                  // Объединяем ячейки
+                  if (RegExp(r'^xlevel[1-9]$').hasMatch(column)) {
+                    if (column == 'xlevel1') {
+                      // Объединение ячеек с ключами 'xlevel1' до 'xlevel9'
+                      return Expanded(
+                        flex: 9,
+                        child: Padding(
+                          padding: const EdgeInsets.all(1.0),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: _hoveredRowIndex == index && index != 0
+                                  ? AppTheme.xlevel1
+                                  : d.colorRow(index == 0 ? 1 : emptyCellIndex),
+                              border: Border.all(color: AppTheme.xlevel2),
+                            ),
+                            padding: const EdgeInsets.all(1.0),
+                            child: Align(
+                              alignment: index == 0
+                                  ? Alignment.center
+                                  : Alignment.centerLeft,
+                              child: Padding(
+                                padding: EdgeInsets.only(
+                                    left: emptyCellIndex >= 0
+                                        ? emptyCellIndex * 50.0
+                                        : 0),
+                                child: Text(
+                                  index == 0
+                                      ? 'Расшифровка'
+                                      : _combineCellsContent(index - 1),
+                                  style: index == 0
+                                      ? const TextStyle()
+                                      : d.textRow(emptyCellIndex,
+                                          _combineCellsContent(index - 1)),
+                                  textAlign: TextAlign.start,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    } else {
+                      return Container(); // Пустое пространство для объединённых ячеек
+                    }
+                  } else {
+                    return Expanded(
+                      child: Padding(
+                        padding: const EdgeInsets.all(1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: _hoveredRowIndex == index && index != 0
+                                ? AppTheme.xlevel1
+                                : d.colorRow(index == 0 ? 1 : emptyCellIndex),
+                            border: Border.all(color: AppTheme.xlevel2),
+                          ),
+                          padding: const EdgeInsets.all(1.0),
+                          child: Align(
+                            alignment: index == 0
+                                ? Alignment.center
+                                : Alignment.centerLeft,
+                            child: Text(
+                              index == 0
+                                  ? column.toString()
+                                  : d.roundDoubleToString(
+                                      _data[index - 1][column]?.toString()),
+                              style: index == 0
+                                  ? const TextStyle()
+                                  : d.textRow(emptyCellIndex,
+                                      _data[index - 1][column]?.toString()),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
-                );
-                // return Expanded(
-                //   child: ResizableContainer(
-                //     emptyCellIndex,
-                //     index,
-                //     column,
-                //     _data,
-                //     (newData) {
-                //       updateData(index - 1, newData);
-                //     },
-                //   ),
-                // );
-              }).toList(),
+                    );
+                  }
+                }).toList(),
+              ),
             ),
           );
         },
       ),
     );
   }
+
+  String _combineCellsContent(int rowIndex) => _data.first.keys
+      .map((key) => RegExp(r'^xlevel[1-9]$').hasMatch(key)
+          ? _data[rowIndex][key]?.toString()
+          : '')
+      .join(' ');
 }

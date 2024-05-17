@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:collection/collection.dart';
 import 'package:fast_csv/csv_converter.dart';
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'dart:html' as html;
 
 import 'app_theme.dart';
@@ -11,14 +10,6 @@ import 'app_theme.dart';
 class Data {
   late List<List<dynamic>>? csvTable;
   late List<Map<String, dynamic>> convertTabled;
-  late List<DataGridRow> dataGridRowTabled;
-
-  // Future<List<Map<String, dynamic>>> getCsv(String? filePath) async {
-  //   final csvString = await rootBundle.loadString('assets/data.csv');
-  //   csvTable = CsvConverter().convert(csvString);
-  //   convertTabled = convertTable(csvTable!);
-  //   return convertTabled;
-  // }
 
   Future<List<Map<String, dynamic>>> loadCsvFile() async {
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
@@ -113,7 +104,11 @@ class Data {
               0,
               (previous, element) =>
                   previous + (double.tryParse(element[key]) ?? 0));
-          firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
+          // firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
+          for (int i = 0; i<index+1;i++) {
+            sum = sum/2;
+          }
+          firstEntry[key] = sum /*/ (2 ^ (index + 1))*/;
         } else {
           firstEntry[key] =
               key == actualKeys /*allKeys*/ .elementAt(index) ? keyGroup : '';
@@ -144,30 +139,6 @@ class Data {
     sortedTable = removeEmptyEntries(sortedTable);
     return sortedTable.toSet().toList();
   }
-
-  // List<Map<String, dynamic>> removeDuplicates(
-  //     List<Map<String, dynamic>> sortedTable) {
-  //   final uniqueEntries = <String>{};
-  //   final uniqueSortedTable = <Map<String, dynamic>>[];
-  //
-  //   for (var entry in sortedTable) {
-  //     // Check if the entry contains any empty values
-  //     bool hasEmptyValue = entry.values.any((value) => value.toString().isEmpty);
-  //
-  //     // Encode entry to JSON string
-  //     final entryJson = jsonEncode(entry);
-  //
-  //     // If entry has no empty values and is unique, add to uniqueSortedTable
-  //     if (!hasEmptyValue && uniqueEntries.add(entryJson)) {
-  //       uniqueSortedTable.add(entry);
-  //     } else if (hasEmptyValue) {
-  //       // If entry has empty values, add to uniqueSortedTable without checking for duplicates
-  //       uniqueSortedTable.add(entry);
-  //     }
-  //   }
-  //
-  //   return uniqueSortedTable;
-  // }
 
   List<Map<String, dynamic>> removeEmptyEntries(
       List<Map<String, dynamic>> sortedTable) {
