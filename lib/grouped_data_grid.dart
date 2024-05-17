@@ -29,7 +29,7 @@ class _GroupedDataGridState extends State<GroupedDataGrid> {
         headerRowHeight: 20,
         // shrinkWrapRows: true,
         // shrinkWrapColumns: true,
-        columnWidthMode: ColumnWidthMode.auto,
+        columnWidthMode: ColumnWidthMode.lastColumnFill,
         source: DataSource(widget.data, widget.i),
         rowHeight: 20,
         columns: widget.data.first.keys.map((key) {
@@ -44,7 +44,6 @@ class _GroupedDataGridState extends State<GroupedDataGrid> {
                     const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
               ),
             ),
-            // width: columnWidth,
           );
         }).toList(),
       );

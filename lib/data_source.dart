@@ -66,13 +66,8 @@ class DataSource extends DataGridSource {
                 fontStyle: emptyCellCount > 0 && emptyCellIndex == 3
                     ? FontStyle.italic
                     : FontStyle.normal,
-                color: Data().textColor(cell.value),
+                color: d.textColor(cell.value),
             ),
-
-            // TextStyle(
-            //     fontWeight:
-            //         isSingleNonEmpty ? FontWeight.bold : FontWeight.normal,
-            //     color: Data().textColor(cell.value)),
           ),
         );
       }).toList(),

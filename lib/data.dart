@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:syncfusion_flutter_datagrid/datagrid.dart';
 import 'dart:html' as html;
 
+import 'app_theme.dart';
+
 class Data {
   late List<List<dynamic>>? csvTable;
   late List<Map<String, dynamic>> convertTabled;
@@ -82,8 +84,8 @@ class Data {
       required List<String> summKeys,
       required int index}) {
     List<String> actualKeys = [];
-    for (int i = 0; i<selectKeys.length; i++) {
-      actualKeys.add('xlevel${i+1}');
+    for (int i = 0; i < selectKeys.length; i++) {
+      actualKeys.add('xlevel${i + 1}');
     }
     actualKeys.addAll(summKeys);
 
@@ -105,7 +107,7 @@ class Data {
 
       double sum = 0;
 
-      for (var key in actualKeys/*allKeys*/) {
+      for (var key in actualKeys /*allKeys*/) {
         if (summKeys.contains(key)) {
           sum = valueGroup.fold(
               0,
@@ -113,7 +115,8 @@ class Data {
                   previous + (double.tryParse(element[key]) ?? 0));
           firstEntry[key] = sum / (index > 0 ? index * 2 : 1) / 2;
         } else {
-          firstEntry[key] = key == actualKeys/*allKeys*/.elementAt(index) ? keyGroup : '';
+          firstEntry[key] =
+              key == actualKeys /*allKeys*/ .elementAt(index) ? keyGroup : '';
         }
       }
       sortedTable.add(firstEntry);
@@ -128,7 +131,7 @@ class Data {
       } else {
         for (var element in valueGroup) {
           Map<String, dynamic> sortedRow = {};
-          for (var key in actualKeys/*allKeys*/) {
+          for (var key in actualKeys /*allKeys*/) {
             sortedRow[key] = element[key] ?? '';
           }
           if (!sortedTable.contains(sortedRow)) {
@@ -166,8 +169,19 @@ class Data {
   //   return uniqueSortedTable;
   // }
 
-  List<Map<String, dynamic>> removeEmptyEntries(List<Map<String, dynamic>> sortedTable) {
-    final List<String> selectKeys = ['xlevel1', 'xlevel2', 'xlevel3', 'xlevel4', 'xlevel5', 'xlevel6', 'xlevel7', 'xlevel8', 'xlevel9'];
+  List<Map<String, dynamic>> removeEmptyEntries(
+      List<Map<String, dynamic>> sortedTable) {
+    final List<String> selectKeys = [
+      'xlevel1',
+      'xlevel2',
+      'xlevel3',
+      'xlevel4',
+      'xlevel5',
+      'xlevel6',
+      'xlevel7',
+      'xlevel8',
+      'xlevel9'
+    ];
     return sortedTable.where((entry) {
       for (var key in selectKeys) {
         if (entry[key] != null && entry[key].toString().isNotEmpty) {
@@ -178,7 +192,6 @@ class Data {
     }).toList();
   }
 
-
   List<Map<String, dynamic>> removeDuplicates(
       List<Map<String, dynamic>> sortedTable, int i) {
     final uniqueEntries = <String>{};
@@ -186,7 +199,8 @@ class Data {
 
     for (var entry in sortedTable) {
       // Check the number of empty values in the entry
-      int emptyValueCount = entry.values.where((value) => value.toString().isEmpty).length;
+      int emptyValueCount =
+          entry.values.where((value) => value.toString().isEmpty).length;
 
       // Encode entry to JSON string
       final entryJson = jsonEncode(entry);
@@ -247,5 +261,29 @@ class Data {
     });
 
     return list1;
+  }
+
+  Color colorRow(int index) {
+    return index == 0
+      ? AppTheme.xlevel1
+      : index == 1
+          ? AppTheme.xlevel2
+          : Colors.white;
+  }
+
+  TextStyle textRow(int index, dynamic value) {
+    return TextStyle(
+      fontSize: 12,
+      fontWeight: /*emptyCellCount > 0 &&*/
+          (index == 0 ||
+              index == 1 ||
+              index == 2)
+          ? FontWeight.bold
+          : FontWeight.normal,
+      fontStyle: /*emptyCellCount > 0 && */index == 3
+          ? FontStyle.italic
+          : FontStyle.normal,
+      color: Data().textColor(value),
+    );
   }
 }

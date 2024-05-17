@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'container_box.dart';
 import 'data.dart';
+import 'dynamic_table.dart';
 import 'grouped_data_grid.dart';
 
 void main() => runApp(const MaterialApp(home: MyHomePage()));
@@ -34,8 +36,8 @@ class _MyHomePageState extends State<MyHomePage> {
   void tap(List<String> _actualKeys) => groupedData = d.sortTable(
       table: data,
       selectKeys: _secondList,
-      allKeys: _actualKeys,
-      summKeys: summKeys,
+      allKeys: d.sortListByAnotherList(actualKeys, allKeys) /*_actualKeys*/,
+      summKeys: d.sortListByAnotherList(summKeys, allKeys) /*summKeys*/,
       index: 0);
 
   @override
@@ -181,19 +183,19 @@ void _tableWindow(BuildContext context, List<Map<String, dynamic>> data,
     builder: (BuildContext context) {
       return Dialog(
         insetPadding: const EdgeInsets.all(10),
-        child: Column(
-          mainAxisSize: MainAxisSize.max,
-          children: [
-            IconButton(
+        child: Scaffold(
+          appBar: AppBar(
+            leading: IconButton(
               icon: const Icon(Icons.close),
               onPressed: () => Navigator.of(context).pop(),
             ),
-            Expanded(
-                child: Align(
-              alignment: Alignment.bottomCenter,
-              child: GroupedDataGrid(data, secondList.length),
-            )),
-          ],
+          ),
+          body:
+          // GroupedDataGrid(data,3),
+          DynamicDataTable(data: data),
+          // ResizableContainer(0,1,'cod1',[
+          //   {'cod1':9}
+          // ]),
         ),
       );
     },
