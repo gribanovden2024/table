@@ -25,7 +25,6 @@ class _DynamicDataTableState extends State<DynamicDataTable> {
 
   @override
   Widget build(BuildContext context) {
-    final d = Data();
     if (_data.isEmpty) {
       return const Center(child: Text('No data available'));
     }
@@ -35,16 +34,8 @@ class _DynamicDataTableState extends State<DynamicDataTable> {
         itemCount: _data.length + 1,
         itemBuilder: (context, index) {
           return MouseRegion(
-            onEnter: (_) {
-              setState(() {
-                _hoveredRowIndex = index;
-              });
-            },
-            onExit: (_) {
-              setState(() {
-                _hoveredRowIndex = -1;
-              });
-            },
+            onEnter: (_) => setState(() => _hoveredRowIndex = index),
+            onExit: (_) => setState(() => _hoveredRowIndex = -1),
             child: IntrinsicHeight(
               child: Row(
                 children: _data.first.keys.map((column) {
@@ -123,7 +114,7 @@ class _DynamicDataTableState extends State<DynamicDataTable> {
                               index == 0
                                   ? column.toString()
                                   : d.roundDoubleToString(
-                                      _data[index - 1][column]?.toString()),
+                                _data[index - 1][column]!.toString(),1),
                               style: index == 0
                                   ? const TextStyle()
                                   : d.textRow(emptyCellIndex,

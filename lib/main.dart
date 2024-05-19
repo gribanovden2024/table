@@ -12,210 +12,165 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  final List<String> allKeys = [];
-  final List<String> actualKeys = [];
-  final List<String> summKeys = [];
-  List<String> _firstList = [];
-  final List<String> _secondList = [];
-  List<Map<String, dynamic>> data = [];
-  List<Map<String, dynamic>> groupedData = [];
-  final d = Data();
-
-  void cleaner() {
-    allKeys.clear();
-    actualKeys.clear();
-    summKeys.clear();
-    _firstList.clear();
-    _secondList.clear();
-    // data.clear();
-    groupedData.clear();
-  }
-
-  void tap(List<String> _actualKeys) => groupedData = d.sortTable(
-      table: data,
-      selectKeys: _secondList,
-      allKeys: d.sortListByAnotherList(actualKeys, allKeys),
-      summKeys: summKeys,
-      index: 0);
+  final List<String> _allKeys = [];
+  final List<String> _sumKeys = [];
+  final List<String> _groupKeys = [];
+  final List<Map<String, dynamic>> _data = [];
+  final List<Map<String, dynamic>> _groupedData = [];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Row(
         children: [
-          Expanded(
-              child: _firstList.isEmpty
-                  ? Container()
-                  : listAll()),
+          listAll(),
           const VerticalDivider(),
           Expanded(
-              child: Column(
-                children: [
-                  Expanded(
-                    child: listGroup(),
-                  ),
-                  const Divider(),
-                  Expanded(
-                    child: listSumm(),
-                  ),
-                ],
-              ),),
+            child: Column(
+              children: [
+                list(_groupKeys),
+                const Divider(),
+                list(_sumKeys),
+              ],
+            ),
+          ),
         ],
       ),
       bottomNavigationBar: barRow(),
     );
   }
 
-  Row barRow() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        ElevatedButton(
-          onPressed: () async {
-            data = await d.loadCsvFile();
-            setState(() {
-              cleaner();
-              _firstList = d.getKeys(data);
-              _firstList.isNotEmpty
-                  ? allKeys.addAll(_firstList.sublist(1))
-                  : allKeys.addAll(_firstList);
-              actualKeys.addAll(allKeys);
-            });
-          },
-          style: ButtonStyle(
-            fixedSize: MaterialStateProperty.all(const Size(300, 50)),
-            textStyle:
-            MaterialStateProperty.all(const TextStyle(fontSize: 14)),
-          ),
-          child: const Text('Выбрать файл'),
+  Row barRow() => Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      ElevatedButton(
+        onPressed: () async {
+          final data = await d.loadCsvFile();
+          setState(() {
+            cleaner();
+            _data.addAll(data);
+            _allKeys.addAll(d.getKeys(_data).first.isEmpty
+                ? d.getKeys(_data).sublist(1)
+                : d.getKeys(_data));
+          });
+        },
+        style: ButtonStyle(
+          fixedSize: MaterialStateProperty.all(const Size(300, 50)),
+          textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 14)),
         ),
-        ElevatedButton(
-          onPressed: () {
-            if (_secondList.isNotEmpty && _secondList != []) {
-              print('_secondList = $_secondList');
-              tap(d.sortListByAnotherList(actualKeys, allKeys));
-            }
-            _tableWindow(
-                context,
-                _secondList.isEmpty || _secondList == [] ? data : groupedData,
-                _secondList);
-          },
-          style: ButtonStyle(
-            fixedSize: MaterialStateProperty.all(const Size(300, 50)),
-            textStyle:
-            MaterialStateProperty.all(const TextStyle(fontSize: 14)),
-          ),
-          child: const Text('Построить'),
+        child: const Text('Выбрать файл'),
+      ),
+      ElevatedButton(
+        onPressed: () {
+          if (_groupKeys.isNotEmpty && _groupKeys != []) {
+            createTable();
+          }
+          _tableWindow(
+              context,
+              _groupKeys.isEmpty || _groupKeys == [] ? _data : _groupedData,
+              _groupKeys);
+        },
+        style: ButtonStyle(
+          fixedSize: MaterialStateProperty.all(const Size(300, 50)),
+          textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 14)),
         ),
-      ],
-    );
-  }
-  ReorderableListView listAll() => ReorderableListView(
-      children: allKeys
+        child: const Text('Построить'),
+      ),
+    ],
+  );
+
+  Expanded listAll() => Expanded(
+    child: ReorderableListView(
+      children: _allKeys
           .map((item) => ListTile(
         visualDensity: const VisualDensity(vertical: -4),
         key: Key(item),
         leading: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            actualKeys.contains(item)
-                ? GestureDetector(
-              child: Icon(summKeys.contains(item)
+            GestureDetector(
+              child: Icon(_sumKeys.contains(item)
                   ? Icons.summarize
                   : Icons.summarize_outlined),
-              onTap: () => setState(() {
-                summKeys.contains(item)
-                    ? summKeys.remove(item)
-                    : summKeys.add(item);
-              }),
+              onTap: () => setState(() => _sumKeys.contains(item)
+                    ? _sumKeys.remove(item)
+                    : {
+                  _sumKeys.add(item),
+                  if (_groupKeys.contains(item))
+                    _groupKeys.remove(item)
+                }),
             )
-                : const SizedBox(),
           ],
         ),
         title: Text(item),
         selectedColor: Colors.green,
-        selected: _secondList.contains(item),
-        onTap: () => setState(() {
-          _secondList.contains(item)
-              ? _secondList.remove(item)
-              : _secondList.add(item);
-          actualKeys.contains(item)
-              ? actualKeys.remove(item)
-              : actualKeys.add(item);
-        }),
+        selected: _groupKeys.contains(item),
+        onTap: () => setState(() => _groupKeys.contains(item)
+              ? _groupKeys.remove(item)
+              : {
+            _groupKeys.add(item),
+            if (_sumKeys.contains(item)) _sumKeys.remove(item)
+          }),
       ))
           .toList(),
-      onReorder: (oldIndex, newIndex) {
-        setState(() {
+      onReorder: (oldIndex, newIndex) => setState(() {
           if (newIndex > oldIndex) {
             newIndex -= 1;
           }
-          final item = allKeys.removeAt(oldIndex);
-          allKeys.insert(newIndex, item);
-        });
+          final item = _allKeys.removeAt(oldIndex);
+          _allKeys.insert(newIndex, item);
+        }),
+    ),
+  );
+
+  Expanded list(List<String> keys) => Expanded(
+    child: ReorderableListView(
+      children: keys
+          .map((item) => ListTile(
+        key: Key(item),
+        title: Text(item),
+        onTap: () => setState(() => keys.remove(item)),
+      ))
+          .toList(),
+      onReorder: (oldIndex, newIndex) => setState(() {
+          if (newIndex > oldIndex) {
+            newIndex -= 1;
+          }
+          final item = keys.removeAt(oldIndex);
+          keys.insert(newIndex, item);
+        }),
+    ),
+  );
+
+  void createTable() {
+    _groupedData.clear();
+    _groupedData.addAll(d.sortTable(
+        table: _data, groupKeys: _groupKeys, sumKeys: _sumKeys, index: 0));
+  }
+
+  void _tableWindow(context, List<Map<String, dynamic>> data,
+      List<String> groupKeys) => showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          insetPadding: const EdgeInsets.all(10),
+          child: Scaffold(
+            appBar: AppBar(
+              leading: IconButton(
+                icon: const Icon(Icons.close),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ),
+            body: DynamicDataTable(data: data),
+          ),
+        );
       },
     );
-  ReorderableListView listGroup() =>ReorderableListView(
-    children: _secondList
-        .map((item) => ListTile(
-      key: Key(item),
-      title: Text(item),
-      onTap: () => setState(() {
-        _secondList.remove(item);
-        actualKeys.add(item);
-      }),
-    ))
-        .toList(),
-    onReorder: (oldIndex, newIndex) {
-      setState(() {
-        if (newIndex > oldIndex) {
-          newIndex -= 1;
-        }
-        final item = _secondList.removeAt(oldIndex);
-        _secondList.insert(newIndex, item);
-      });
-    },
-  );
-  ReorderableListView listSumm() =>ReorderableListView(
-    children: summKeys
-        .map((item) => ListTile(
-      key: Key(item),
-      title: Text(item),
-      onTap: () => setState(() {
-        summKeys.remove(item);
-      }),
-    ))
-        .toList(),
-    onReorder: (oldIndex, newIndex) {
-      setState(() {
-        if (newIndex > oldIndex) {
-          newIndex -= 1;
-        }
-        final item = summKeys.removeAt(oldIndex);
-        summKeys.insert(newIndex, item);
-      });
-    },
-  );
-}
 
-void _tableWindow(BuildContext context, List<Map<String, dynamic>> data,
-    List<String> secondList) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return Dialog(
-        insetPadding: const EdgeInsets.all(10),
-        child: Scaffold(
-          appBar: AppBar(
-            leading: IconButton(
-              icon: const Icon(Icons.close),
-              onPressed: () => Navigator.of(context).pop(),
-            ),
-          ),
-          body:
-          DynamicDataTable(data: data),
-        ),
-      );
-    },
-  );
+  void cleaner() {
+    _allKeys.clear();
+    _sumKeys.clear();
+    _groupKeys.clear();
+    _groupedData.clear();
+  }
 }
