@@ -18,26 +18,16 @@ class Data {
     html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
     uploadInput.accept = '.csv';
     uploadInput.click();
-
     await uploadInput.onChange.first;
-
     html.File file = uploadInput.files!.first;
-
     final reader = html.FileReader();
     final completer = Completer<String>();
-
-    reader.onLoadEnd.listen((event) {
-      completer.complete(reader.result as String);
-    });
-
+    reader.onLoadEnd
+        .listen((event) => completer.complete(reader.result as String));
     reader.readAsText(file);
-
     String csvString = await completer.future;
-
     final csvTable = CsvConverter().convert(csvString);
-    final convertedTable = convertTable(csvTable);
-
-    return convertedTable;
+    return convertTable(csvTable);
   }
 
   List<String> getKeys(List<Map<String, dynamic>>? data) {
@@ -183,11 +173,12 @@ class Data {
   String roundDoubleToString(String value, int i) {
     return (double.tryParse(value) == null)
         ? value
-        :((double.tryParse(value)! * pow(10,i)).round() / pow(10,i)).toString();
+        : ((double.tryParse(value)! * pow(10, i)).round() / pow(10, i))
+            .toString();
   }
 
-  Color colorRow(int index) {
-    return index == 0
+  Color colorRow(int index, dynamic data) {
+    return index == 0 && data.first.keys.first == 'xlevel1'
         ? AppTheme.xlevel1
         : index == 1
             ? AppTheme.xlevel2

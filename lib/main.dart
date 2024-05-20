@@ -67,8 +67,7 @@ class _MyHomePageState extends State<MyHomePage> {
           }
           _tableWindow(
               context,
-              _groupKeys.isEmpty || _groupKeys == [] ? _data : _groupedData,
-              _groupKeys);
+              _groupKeys.isEmpty || _groupKeys == [] ? _data : _groupedData);
         },
         style: ButtonStyle(
           fixedSize: MaterialStateProperty.all(const Size(300, 50)),
@@ -148,8 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
         table: _data, groupKeys: _groupKeys, sumKeys: _sumKeys, index: 0));
   }
 
-  void _tableWindow(context, List<Map<String, dynamic>> data,
-      List<String> groupKeys) => showDialog(
+  void _tableWindow(context, List<Map<String, dynamic>> data) => showDialog(
       context: context,
       builder: (BuildContext context) {
         return Dialog(
@@ -171,6 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
     _allKeys.clear();
     _sumKeys.clear();
     _groupKeys.clear();
+    _data.clear();
     _groupedData.clear();
   }
 }
